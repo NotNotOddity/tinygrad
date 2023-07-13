@@ -1,8 +1,14 @@
 name: Unit Tests
+
+# TODO: Echo's on tasks to show progress during tests, can be removed if we don't want to see them
+# TODO: removed matrix from clang, can add back later if wanted. Should work with actions for caching.
+# TODO: Can add python matrix via the action inputs, but not sure if we want to test all versions atm
+
 on:
   push:
   pull_request:
   workflow_dispatch:
+
 jobs:
   
   lets-cache: # By: Earth, Wind & TinyGrad
@@ -59,6 +65,17 @@ jobs:
     - name: Test LLVM
       run: source .venv/bin/activate && ENABLE_METHOD_CACHE=1 LLVM=1 python -m pytest -s -v -n=auto test/
 
+  clang:
+    name: Test Clang
+    needs: lets-cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions/setup-env
+    - name: Test Clang
+      run: source .venv/bin/activate && CI=1 CLANG=1 ENABLE_METHOD_CACHE=1 python -m pytest -s -v -n=auto test/
+
 #  testwebgpu:
 #    name: WebGPU Tests
 #    runs-on: macos-13
@@ -105,26 +122,6 @@ jobs:
 #      run: curl https://media.istockphoto.com/photos/hen-picture-id831791190 | ./recognize | grep hen
 #
 #
-#  testclang:
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, windows-latest]
-#    runs-on: ${{ matrix.os }}
-#    name: CLANG Tests ${{ matrix.os }} (w method cache)
-#
-#    steps:
-#    - name: Checkout Code
-#      uses: actions/checkout@v3
-#    - name: Set up Python 3.8
-#      uses: actions/setup-python@v4
-#      with:
-#        python-version: 3.8
-#    - name: Install Dependencies
-#      run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
-#    - name: Set env
-#      run: printf "CI=1\nCLANG=1\nENABLE_METHOD_CACHE=1" >> $GITHUB_ENV
-#    - name: Run Pytest
-#      run: python -m pytest -s -v -n=auto test/
 #
 #  testtorch:
 #    name: Torch Tests
