@@ -16,6 +16,8 @@ jobs:
         python-version: "3.8"
     # ECho python install directory
     - run: echo ${{ steps.python-38.outputs.python-path }}
+    - run: echo $pythonLocation
+    - run: echo $Python3_ROOT_DIR
     #- uses: actions/cache@v3
     #  id: python
     #  with:
