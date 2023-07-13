@@ -6,46 +6,49 @@ on:
   workflow_dispatch:
 
 jobs:
-  lets-cache-test:
+  lets-cache-testing:
     name: lets-cache # By: Earth, Wind & TinyGrad
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
-      id: python-test
+      id: python
       with:
         python-version: "3.8"
     - uses: actions/cache@v3
-      id: cache-test
+      id: lets-cache-testing
       with:
         path: .venv
-        key: python-venv-${{ runner.os }}-$${{ steps.python-test.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
+        key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
         restore-keys: |
-          python-venv-${{ runner.os }}-$${{ steps.python-test.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-
-    - if: steps.cache-test.outputs.cache-hit != 'true'
+          python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-
+    - if: steps.lets-cache-testing.outputs.cache-hit != 'true'
       run: |
         python -m venv .venv
         source .venv/bin/activate
         pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
-    - if: steps.cache-test.outputs.cache-hit == 'true'
-      run: |
-        echo "WE BE CACHIN!!" && ls -a
-        source .venv/bin/activate
-        pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
 
-  #lets-cache-lint:
-  #  name: lets-cache # By: Earth, Wind & TinyGrad
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #  - uses: actions/checkout@v3
-  #  - uses: actions/setup-python@v4
-  #    id: python-lint
-  #    with:
-  #      python-version: "3.8"
-  #      cache: 'pip'
-  #      cache-dependency-path: setup.py
-  #  - name: Install dependencies
-  #    run: pip install -e '.[linting,testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+  lets-cache-linting:
+    name: lets-cache-linting
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      id: python
+      with:
+        python-version: "3.8"
+    - uses: actions/cache@v3
+      id: lets-cache-linting
+      with:
+        path: .venv
+        key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[linting,testing]
+        restore-keys: |
+          python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
+    - if: steps.lets-cache-linting.outputs.cache-hit != 'true'
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install -e '.[linting,testing]' --extra-index-url https://download.pytorch.org/whl/cpu
 
 
 #  linter:
