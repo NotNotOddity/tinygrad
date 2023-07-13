@@ -20,8 +20,6 @@ jobs:
       with:
         path: .venv
         key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-testing
-        restore-keys: |
-          python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-
     - if: steps.lets-cache-testing.outputs.cache-hit != 'true'
       run: |
         python -m venv .venv
@@ -30,6 +28,7 @@ jobs:
 
   lets-cache-linting:
     name: lets-cache-linting
+    needs: lets-cache-testing
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
