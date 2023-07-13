@@ -6,6 +6,10 @@ inputs:
     description: 'Version of Python to set up'
     required: false
     default: '3.8.17'
+  install-llvm:
+    description: 'Re-install LLVM'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -23,4 +27,7 @@ runs:
       run: |
         python -m pip install --upgrade pip
         pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
+      shell: bash
+    - if: steps.dependency-cache.outputs.cache-hit == 'true' && ${{ inputs.re-install-llvm }} == 'true'
+      run: source .venv/bin/activate && pip install -e '.[llvm]'
       shell: bash
