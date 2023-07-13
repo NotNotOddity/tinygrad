@@ -16,7 +16,7 @@ jobs:
       id: python
       with:
         python-version: 3.8.17
-    - uses: actions/cache/save@v3
+    - uses: actions/cache@v3
       id: lets-cache-testing
       with:
         path: .venv
