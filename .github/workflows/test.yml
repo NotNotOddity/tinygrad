@@ -19,7 +19,7 @@ jobs:
       id: lets-cache-testing
       with:
         path: .venv
-        key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
+        key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-testing
         restore-keys: |
           python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-
     - if: steps.lets-cache-testing.outputs.cache-hit != 'true'
@@ -41,9 +41,9 @@ jobs:
       id: lets-cache-linting
       with:
         path: .venv
-        key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[linting,testing]
+        key: python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-linting-testing
         restore-keys: |
-          python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
+          python-venv-${{ runner.os }}-$${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-testing
     - if: steps.lets-cache-linting.outputs.cache-hit != 'true'
       run: |
         python -m venv .venv
