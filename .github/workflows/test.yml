@@ -18,7 +18,11 @@ jobs:
     - run: python -m venv .venv
     - run: source .venv/bin/activate
     - run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
-    - run: ls -a
+    - uses: actions/cache@v3
+      id: cache-test
+      with:
+        path: .venv
+        key: python-venv-${{ runner.os }}-$${{ steps.python-test.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
 
   #lets-cache-lint:
   #  name: lets-cache # By: Earth, Wind & TinyGrad
