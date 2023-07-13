@@ -23,7 +23,7 @@ runs:
       with:
         path: .venv
         key: python-venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}
-    - if: steps.dependency-cache.outputs.cache-hit != 'true' && inputs.read-only != '/restore'
+    - if: steps.dependency-cache.outputs.cache-hit != 'true' && '${{ inputs.read-only }}' != '/restore'
       run: |
         python -m venv .venv
         source .venv/bin/activate
@@ -32,3 +32,4 @@ runs:
       shell: bash
     - if: steps.dependency-cache.outputs.cache-hit != 'true' || inputs.read-only == '/restore'
       run: pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
+      shell: bash
