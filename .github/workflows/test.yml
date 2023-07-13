@@ -6,6 +6,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  lets-cache:
+    name: lets-cache # By: Earth, Wind & TinyGrad
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v4
+      id: python-38
+      with:
+        python-version: "3.8"
+    # ECho python install directory
+    - run: echo ${{ steps.python-38.outputs.python-path }}
+    #- uses: actions/cache@v3
+    #  id: python
+    #  with:
+    #    path: |
+    #      ~/.cache/pip
+    #      ~/.cache/pre-commit
+    #    key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+    #    restore-keys: |
+    #      ${{ runner.os }}-pip-
+
 #  linter:
 #    name: Linters
 #    runs-on: ubuntu-latest
