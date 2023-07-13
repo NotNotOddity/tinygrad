@@ -45,22 +45,23 @@ jobs:
         path: .venv
         key: python-venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}
     - if: steps.dependency-cache.outputs.cache-hit != 'true'
-      run: pip install -e '.[testing,linting]' --extra-index-url https://download.pytorch.org/whl/cpu
-    - name: Repo line count
-      run: python3 sz.py
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install -e '.[testing,linting]' --extra-index-url https://download.pytorch.org/whl/cpu
     - name: Lint with pylint
-      run: python -m pylint --disable=all -e W0311 --jobs=0 --indent-string='  ' **/*.py
+      run: python -m venv .venv && source .venv/bin/activate && python -m pylint --disable=all -e W0311 --jobs=0 --indent-string='  ' **/*.py
     - name: Lint with flake8
-      run: flake8 tinygrad/ --indent-size=2 --select=F,E112,E113,E203,E304,E502,E702,E703,E71,E72,E731,W191,W6 --statistics -j4
+      run: python -m venv .venv && source .venv/bin/activate && flake8 tinygrad/ --indent-size=2 --select=F,E112,E113,E203,E304,E502,E702,E703,E71,E72,E731,W191,W6 --statistics -j4
     - name: Lint tinygrad with pylint
-      run: pylint tinygrad/
+      run: python -m venv .venv && source .venv/bin/activate && pylint tinygrad/
     - name: Run mypy
-      run: mypy tinygrad/ --ignore-missing-imports --check-untyped-defs --explicit-package-bases --warn-unreachable
+      run: python -m venv .venv && source .venv/bin/activate && mypy tinygrad/ --ignore-missing-imports --check-untyped-defs --explicit-package-bases --warn-unreachable
     - name: Install SLOCCount
       run: sudo apt-get install sloccount
     - name: Check <5000 lines
       run: sloccount tinygrad test examples extra; if [ $(sloccount tinygrad | sed -n 's/.*Total Physical Source Lines of Code (SLOC)[ ]*= \([^ ]*\).*/\1/p' | tr -d ',') -gt 5000 ]; then exit 1; fi
-#
+# whai u do this to me? :(
 #  testcpu:
 #    name: CPU Tests
 #    runs-on: ubuntu-latest
