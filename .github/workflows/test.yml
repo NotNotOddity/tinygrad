@@ -23,6 +23,8 @@ jobs:
       with:
         path: .venv
         key: python-venv-${{ runner.os }}-$${{ steps.python-test.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-[testing]
+        restore-keys: |
+          python-venv-${{ runner.os }}-$${{ steps.python-test.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-
 
   #lets-cache-lint:
   #  name: lets-cache # By: Earth, Wind & TinyGrad
