@@ -1,5 +1,5 @@
-name: 'Setup Environment and Restore Cache'
-description: 'Setup Python and Restore Cache dependencies'
+name: 'Setup Environment and Cache Dependencies'
+description: 'Setup Python and Cache dependencies'
 
 inputs:
   python-version:
@@ -14,13 +14,15 @@ runs:
       id: python
       with:
         python-version: ${{ inputs.python-version }}
-    - uses: actions/cache/restore@v3
+    - uses: actions/cache@v3
       id: dependency-cache
       with:
         path: .venv
         key: python-venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}
     - if: steps.dependency-cache.outputs.cache-hit != 'true'
       run: |
+        python -m venv .venv
+        source .venv/bin/activate
         python -m pip install --upgrade pip
         pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
       shell: bash

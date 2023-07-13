@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-env
+    - uses: ./.github/actions/setup-cache
       with:
         read-only: ''
   lint:
