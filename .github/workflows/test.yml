@@ -26,7 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
   lint:
-    name: Lint
+    name: Lint & Test Docs
     needs: lets-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -45,6 +45,11 @@ jobs:
         echo "Flake8 tinygrad" && flake8 tinygrad/ --indent-size=2 --select=F,E112,E113,E203,E304,E502,E702,E703,E71,E72,E731,W191,W6 --statistics -j4
         echo "mypy" && mypy tinygrad/ --ignore-missing-imports --check-untyped-defs --explicit-package-bases --warn-unreachable
         echo "Check <5000 lines" && sudo apt-get install sloccount && sloccount tinygrad test examples extra; if [ $(sloccount tinygrad | sed -n 's/.*Total Physical Source Lines of Code (SLOC)[ ]*= \([^ ]*\).*/\1/p' | tr -d ',') -gt 5000 ]; then exit 1; fi
+    - name: Test Docs
+      run: |
+        python -m venv .venv && source .venv/bin/activate
+        echo "Test abstractions.py" && python docs/abstractions.py
+        echo "Test quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
   cpu:
     name: Test CPU
     needs: lets-cache
@@ -58,11 +63,7 @@ jobs:
         cache-key: python-venv-${{ runner.os }}-3.8.17-${{ hashFiles('**/setup.py') }}
         extras: 'testing,linting'
     - name: Test CPU
-      run: |
-        python -m venv .venv && source .venv/bin/activate
-        echo "Test CPU" && python -m pytest -s -v -n=auto test/
-        echo "Test Quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
-        echo "Pytest" && python -m pytest -s -v -n=auto test/
+      run: python -m venv .venv && source .venv/bin/activate && python -m pytest -s -v -n=auto test/
   llvm:
     name: Test LLVM
     needs: lets-cache
