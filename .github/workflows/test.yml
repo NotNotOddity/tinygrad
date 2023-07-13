@@ -28,6 +28,16 @@ jobs:
     #    restore-keys: |
     #      ${{ runner.os }}-pip-
 
+  still-fast:
+    name: are-we-still-fast
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v4
+      id: python-38-but-faster
+      with:
+        python-version: "3.8"
+
+
 #  linter:
 #    name: Linters
 #    runs-on: ubuntu-latest
