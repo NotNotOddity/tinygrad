@@ -15,10 +15,10 @@ jobs:
       id: python-test
       with:
         python-version: "3.8"
-        cache: 'python-test'
-        cache-dependency-path: setup.py
-    - name: Install dependencies
-      run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+    - run: python -m venv .venv
+    - run: source .venv/bin/activate
+    - run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+    - run: ls -a
 
   #lets-cache-lint:
   #  name: lets-cache # By: Earth, Wind & TinyGrad
