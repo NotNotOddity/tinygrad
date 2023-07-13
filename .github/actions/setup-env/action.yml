@@ -1,0 +1,33 @@
+name: 'Setup Environment'
+description: 'Setup Python and Cache dependencies'
+
+inputs:
+  python-version:
+    description: 'Version of Python to set up'
+    required: true
+    default: '3.8.17'
+  cache-key:
+    description: 'Key to use when caching dependencies'
+    required: true
+  extras:
+    description: 'Extra dependencies to install'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+    - uses: actions/cache@v3
+      id: dependency-cache
+      with:
+        path: .venv
+        key: ${{ inputs.cache-key }}
+    - if: steps.dependency-cache.outputs.cache-hit != 'true'
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -e '.[${{ inputs.extras }}]' --extra-index-url https://download.pytorch.org/whl/cpu
+      shell: bash
