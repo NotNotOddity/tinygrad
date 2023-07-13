@@ -19,8 +19,8 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-cache
 
-  lint:
-    name: Lint & Test Docs
+  lint-test-docs:
+    name: Lint, Test Fast, and Docs
     needs: lets-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -50,7 +50,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
     - name: Test CPU
-      run: source .venv/bin/activate && python -m pytest -s -v -n=auto test/
+      run: source .venv/bin/activate && python -m pytest -s -v -n=4 test/
 
   llvm:
     name: Test LLVM
@@ -63,7 +63,7 @@ jobs:
       with:
         install-llvm: true
     - name: Test LLVM
-      run: source .venv/bin/activate && ENABLE_METHOD_CACHE=1 LLVM=1 python -m pytest -s -v -n=auto test/
+      run: source .venv/bin/activate && ENABLE_METHOD_CACHE=1 LLVM=1 python -m pytest -s -v -n=4 test/
 
   clang:
     name: Test Clang
@@ -74,7 +74,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
     - name: Test Clang
-      run: source .venv/bin/activate && CI=1 CLANG=1 ENABLE_METHOD_CACHE=1 python -m pytest -s -v -n=auto test/
+      run: source .venv/bin/activate && CI=1 CLANG=1 ENABLE_METHOD_CACHE=1 python -m pytest -s -v -n=4 test/
 
 #  testwebgpu:
 #    name: WebGPU Tests
