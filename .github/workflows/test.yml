@@ -6,36 +6,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  lets-cache:
+  lets-cache-test:
     name: lets-cache # By: Earth, Wind & TinyGrad
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
-      id: python-38
+      id: python-test
       with:
         python-version: "3.8"
-    # ECho python install directory
-    - run: echo ${{ steps.python-38.outputs.python-path }}
-    - run: echo $pythonLocation
-    - run: echo $Python3_ROOT_DIR
-    #- uses: actions/cache@v3
-    #  id: python
-    #  with:
-    #    path: |
-    #      ~/.cache/pip
-    #      ~/.cache/pre-commit
-    #    key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-    #    restore-keys: |
-    #      ${{ runner.os }}-pip-
+        cache: 'python-test'
+        cache-dependency-path: setup.py
+    - name: Install dependencies
+      run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
 
-  still-fast:
-    name: are-we-still-fast
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/setup-python@v4
-      id: python-38-but-faster
-      with:
-        python-version: "3.8"
+  #lets-cache-lint:
+  #  name: lets-cache # By: Earth, Wind & TinyGrad
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - uses: actions/checkout@v3
+  #  - uses: actions/setup-python@v4
+  #    id: python-lint
+  #    with:
+  #      python-version: "3.8"
+  #      cache: 'pip'
+  #      cache-dependency-path: setup.py
+  #  - name: Install dependencies
+  #    run: pip install -e '.[linting,testing]' --extra-index-url https://download.pytorch.org/whl/cpu
 
 
 #  linter:
