@@ -15,8 +15,6 @@ jobs:
       id: python-test
       with:
         python-version: "3.8"
-    - run: python -m venv .venv
-    - run: source .venv/bin/activate
     - uses: actions/cache@v3
       id: cache-test
       with:
@@ -25,11 +23,15 @@ jobs:
         restore-keys: |
           python-venv-${{ runner.os }}-$${{ steps.python-test.outputs.python-version }}-${{ hashFiles('**/setup.py') }}-
     - if: steps.cache-test.outputs.cache-hit != 'true'
-      run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
     - if: steps.cache-test.outputs.cache-hit == 'true'
-      run: echo "WE BE CACHIN!!"
-    - run: ls -a
-    - run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+      run: |
+        echo "WE BE CACHIN!!" && ls -a
+        source .venv/bin/activate
+        pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
 
   #lets-cache-lint:
   #  name: lets-cache # By: Earth, Wind & TinyGrad
