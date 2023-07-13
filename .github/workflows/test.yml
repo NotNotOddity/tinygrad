@@ -29,7 +29,7 @@ jobs:
         pip install -e '.[testing,linting]' --extra-index-url https://download.pytorch.org/whl/cpu
 
   linter:
-    name: Linters
+    name: Lint & Test CPU
     needs: lets-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -49,13 +49,20 @@ jobs:
         python -m venv .venv
         source .venv/bin/activate
         pip install -e '.[testing,linting]' --extra-index-url https://download.pytorch.org/whl/cpu
-    - run: |
+    - name: Linting
+      run: |
         python -m venv .venv && source .venv/bin/activate
         echo "Spaces... Not tabs!" && python -m pylint --disable=all -e W0311 --jobs=0 --indent-string='  ' **/*.py
         echo "Lint tinygrad" && pylint tinygrad/
         echo "Flake8 tinygrad" && flake8 tinygrad/ --indent-size=2 --select=F,E112,E113,E203,E304,E502,E702,E703,E71,E72,E731,W191,W6 --statistics -j4
         echo "mypy" && mypy tinygrad/ --ignore-missing-imports --check-untyped-defs --explicit-package-bases --warn-unreachable
         echo "Check <5000 lines" && sudo apt-get install sloccount && sloccount tinygrad test examples extra; if [ $(sloccount tinygrad | sed -n 's/.*Total Physical Source Lines of Code (SLOC)[ ]*= \([^ ]*\).*/\1/p' | tr -d ',') -gt 5000 ]; then exit 1; fi
+    - name: Test CPU
+      run: |
+        python -m venv .venv && source .venv/bin/activate
+        echo "Test CPU" && python -m pytest -s -v -n=auto test/
+        echo "Test Quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
+        echo "Pytest" && python -m pytest -s -v -n=auto test/
 
 # whai u do this to me? :(
 #  testcpu:
@@ -73,11 +80,11 @@ jobs:
 #    - name: Install Dependencies
 #      run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
 #    - name: Test Docs
-#      run: python docs/abstractions.py
+#      run: 
 #    - name: Test Quickstart
-#      run: awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
+#      run: 
 #    - name: Run Pytest
-#      run: python -m pytest -s -v -n=auto test/
+#      run: 
 #  
 #  testwebgpu:
 #    name: WebGPU Tests
