@@ -53,7 +53,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
     - name: Test LLVM
-      run: ENABLE_METHOD_CACHE=1 LLVM=1 python -m pytest -s -v -n=auto test/
+      run: source .venv/bin/activate && ENABLE_METHOD_CACHE=1 LLVM=1 python -m pytest -s -v -n=auto test/
 
 #  testwebgpu:
 #    name: WebGPU Tests
