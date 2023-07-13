@@ -10,21 +10,9 @@ jobs:
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      id: python
+    - uses: ./.github/actions/setup-env
       with:
-        python-version: 3.8.17
-    - uses: actions/cache@v3
-      id: lets-cache-testing
-      with:
-        path: .venv
-        key: python-venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}
-    - if: steps.lets-cache-testing.outputs.cache-hit != 'true'
-      run: |
-        python -m venv .venv
-        source .venv/bin/activate
-        python -m pip install --upgrade pip
-        pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
+        read-only: ''
   lint:
     name: Lint & Test Docs
     needs: lets-cache
@@ -33,10 +21,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8.17
-        cache-key: python-venv-${{ runner.os }}-3.8.17-${{ hashFiles('**/setup.py') }}
-        extras: 'testing,linting'
     - name: Lint
       run: |
         python -m venv .venv && source .venv/bin/activate
@@ -47,7 +31,7 @@ jobs:
         echo "Check <5000 lines" && sudo apt-get install sloccount && sloccount tinygrad test examples extra; if [ $(sloccount tinygrad | sed -n 's/.*Total Physical Source Lines of Code (SLOC)[ ]*= \([^ ]*\).*/\1/p' | tr -d ',') -gt 5000 ]; then exit 1; fi
     - name: Test Docs
       run: |
-        python -m venv .venv && source .venv/bin/activate
+        source .venv/bin/activate
         echo "Test abstractions.py" && python docs/abstractions.py
         echo "Test quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
   cpu:
@@ -58,12 +42,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8.17
-        cache-key: python-venv-${{ runner.os }}-3.8.17-${{ hashFiles('**/setup.py') }}
-        extras: 'testing,linting'
     - name: Test CPU
-      run: python -m venv .venv && source .venv/bin/activate && python -m pytest -s -v -n=auto test/
+      run: source .venv/bin/activate && python -m pytest -s -v -n=auto test/
   llvm:
     name: Test LLVM
     needs: lets-cache
@@ -72,10 +52,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8.17
-        cache-key: python-venv-${{ runner.os }}-3.8.17-${{ hashFiles('**/setup.py') }}
-        extras: 'testing,linting'
     - name: Test LLVM
       run: ENABLE_METHOD_CACHE=1 LLVM=1 python -m pytest -s -v -n=auto test/
 

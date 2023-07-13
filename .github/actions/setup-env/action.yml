@@ -6,6 +6,10 @@ inputs:
     description: 'Version of Python to set up'
     required: false
     default: '3.8.17'
+  read-only:
+    description: 'Whether to use the cache in read-only mode'
+    required: false
+    default: '/restore'
 
 runs:
   using: "composite"
@@ -14,15 +18,17 @@ runs:
       id: python
       with:
         python-version: ${{ inputs.python-version }}
-    - uses: actions/cache@v3
+    - uses: actions/cache${{ inputs.read-only }}@v3
       id: dependency-cache
       with:
         path: .venv
         key: python-venv-${{ runner.os }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/setup.py') }}
-    - if: steps.dependency-cache.outputs.cache-hit != 'true'
+    - if: steps.dependency-cache.outputs.cache-hit != 'true' && inputs.read-only != '/restore'
       run: |
         python -m venv .venv
         source .venv/bin/activate
         python -m pip install --upgrade pip
         pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
       shell: bash
+    - if: steps.dependency-cache.outputs.cache-hit != 'true' || inputs.read-only == '/restore'
+      run: pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
