@@ -20,7 +20,7 @@ jobs:
     - uses: ./.github/actions/setup-cache
 
   lint-test-docs:
-    name: Lint, Test Fast, and Docs
+    name: Lint and Docs
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -46,17 +46,11 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        model: [CPU, LLVM, CLANG]
+        model: ['', 'LLVM=1', 'CLANG=1']
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-    - if: matrix.model == 'CPU'
-      run: source .venv/bin/activate && CI=1 python -m pytest -s -v -n=auto test/models
-    - if: matrix.model == 'LLVM'
-      run: source .venv/bin/activate && CI=1 LLVM=1 python -m pytest -s -v -n=auto test/models
-    - if: matrix.model == 'CLANG'
-      run: source .venv/bin/activate && CI=1 CLANG=1 python -m pytest -s -v -n=auto test/models
-
+    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }} python -m pytest -s -v -n=auto test/models
 #  cpu:
 #    name: Test CPU
 #    needs: lets-cache
