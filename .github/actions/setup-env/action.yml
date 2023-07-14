@@ -28,6 +28,6 @@ runs:
         python -m pip install --upgrade pip
         pip install -e '.[testing,linting,llvm]' --extra-index-url https://download.pytorch.org/whl/cpu
       shell: bash
-    - if: steps.dependency-cache.outputs.cache-hit == 'true' && ${{ inputs.re-install-llvm }} == 'true'
-      run: source .venv/bin/activate && pip install -e '.[llvm]'
-      shell: bash
+#    - if: steps.dependency-cache.outputs.cache-hit == 'true' && ${{ inputs.re-install-llvm }} == 'true'
+#      run: source .venv/bin/activate && pip install -e '.[llvm]'
+#      shell: bash
