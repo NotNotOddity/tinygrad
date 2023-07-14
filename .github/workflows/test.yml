@@ -1,7 +1,7 @@
 name: Unit Tests
 
 # TODO: Echo's on tasks to show progress during tests, can be removed if we don't want to see them
-# TODO: removed matrix from clang, can add back later if wanted. Should work with actions for caching.
+# TODO: removed os matrix from clang, can add back later if wanted. Should work with actions for caching.
 # TODO: Can add python matrix via the action inputs, but not sure if we want to test all versions atm
 
 on:
