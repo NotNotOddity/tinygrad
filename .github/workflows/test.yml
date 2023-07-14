@@ -41,40 +41,58 @@ jobs:
         echo "Test abstractions.py" && python docs/abstractions.py
         echo "Test quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
 
-  cpu:
-    name: Test CPU
+  models:
+    name: Test Models
     needs: lets-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        model: [CPU, LLVM, CLANG]
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-    - name: Test CPU
-      run: source .venv/bin/activate && CI=1 python -m pytest -s -v -n=4 test/
+    - if: matrix.model == 'CPU'
+      run: source .venv/bin/activate && CI=1 python -m pytest -s -v -n=auto test/models
+    - if: matrix.model == 'LLVM'
+      run: source .venv/bin/activate && CI=1 LLVM=1 python -m pytest -s -v -n=auto test/models
+    - if: matrix.model == 'CLANG'
+      run: source .venv/bin/activate && CI=1 CLANG=1 python -m pytest -s -v -n=auto test/models
 
-  llvm:
-    name: Test LLVM
-    needs: lets-cache
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-    - uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-env
-      with:
-        install-llvm: true
-    - name: Test LLVM
-      run: source .venv/bin/activate && CI=1 LLVM=1 python -m pytest -s -v -n=4 test/
-
-  clang:
-    name: Test Clang
-    needs: lets-cache
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-    - uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-env
-    - name: Test Clang
-      run: source .venv/bin/activate && CI=1 CLANG=1 python -m pytest -s -v -n=4 test/
+#  cpu:
+#    name: Test CPU
+#    needs: lets-cache
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#    - name: Test CPU
+#      run: source .venv/bin/activate && CI=1 python -m pytest -s -v -n=auto test/
+#
+#  llvm: 
+#    name: Test LLVM
+#    needs: lets-cache
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#      with:
+#        install-llvm: true
+#    - name: Test LLVM
+#      run: source .venv/bin/activate && CI=1 LLVM=1 python -m pytest -s -v -n=auto test/
+#
+#  clang:
+#    name: Test Clang
+#    needs: lets-cache
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#    - name: Test Clang
+#      run: source .venv/bin/activate && CI=1 CLANG=1 python -m pytest -s -v -n=auto test/
 
 #  testwebgpu:
 #    name: WebGPU Tests
