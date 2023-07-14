@@ -21,7 +21,6 @@ jobs:
 
   lint-test-docs:
     name: Lint, Test Fast, and Docs
-    needs: lets-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -43,7 +42,6 @@ jobs:
 
   models:
     name: Test Models
-    needs: lets-cache
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
