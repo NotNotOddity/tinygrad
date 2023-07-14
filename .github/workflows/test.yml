@@ -41,7 +41,7 @@ jobs:
         echo "Test quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
 
   test-ops:
-    name: Test Models
+    name: Test Ops
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto test/test_ops.py
+    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/test_ops.py
 
   test-models:
     name: Test Models
@@ -62,7 +62,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto test/models
+    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/models
 
 #  cpu:
 #    name: Test CPU
