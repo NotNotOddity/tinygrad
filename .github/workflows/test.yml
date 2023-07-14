@@ -40,6 +40,24 @@ jobs:
         echo "Test abstractions.py" && python docs/abstractions.py
         echo "Test quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
 
+  test-models:
+    name: Test Models
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        model: ['CPU', 'LLVM', 'CLANG', 'TORCH']
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions/setup-env
+    - uses: actions/cache@v3
+      id: model-cache
+      with:
+        path: |
+          /home/runner/.cache/torch/
+        key: models-${{ hashFiles('test/models/**.py') }}
+    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/models
+
   test-ops:
     name: Test Ops
     runs-on: ubuntu-latest
@@ -51,18 +69,6 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
     - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/test_ops.py
-
-  test-models:
-    name: Test Models
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        model: ['CPU', 'LLVM', 'CLANG', 'TORCH']
-    steps:
-    - uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-env
-    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/models
 
 #  cpu:
 #    name: Test CPU
