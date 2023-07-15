@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        model: ['CPU', 'LLVM', 'CLANG', 'TORCH']
+        model: ['CPU', 'LLVM', 'TORCH']
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
@@ -64,7 +64,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        model: ['CPU', 'LLVM', 'CLANG', 'TORCH']
+        model: ['CPU', 'LLVM', 'TORCH']
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
