@@ -40,36 +40,81 @@ jobs:
         echo "Test abstractions.py" && python docs/abstractions.py
         echo "Test quickstart" && awk '/```python/{flag=1;next}/```/{flag=0}flag' docs/quickstart.md > quickstart.py && PYTHONPATH=. python3 quickstart.py
 
-  test-models:
-    name: Test Models
+  test-runners:
+    name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       matrix:
-        model: ['CPU', 'LLVM', 'TORCH']
+        models: ['CPU=1', 'LLVM=1', 'TORCH=1']
+        tests: [
+          'test_tensors.py', 'test_speed_v_torch.py', 'test_specific_cov.py',
+          'test_randomness.py', 'test_optim.py', 'test_net_speed.py',
+          'test_lazybuffer.py', 'test_jit.py', 'test_gc.py', 'test_dtype.py',
+          'test_custom_function.py', 'test_conv.py', 'test_conv_shapetracker.py',
+          'test_assign.py', 'unit', 'models', 'extra', 'external'
+        ]
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/setup-env
-    - uses: actions/cache@v3
-      id: model-cache
-      with:
-        path: |
-          /home/runner/.cache/torch/
-        key: models-${{ hashFiles('test/models/**.py') }}
-    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/models
+    - run: source .venv/bin/activate && CI=1 ${{ matrix.models }} python -m pytest -s -v -n=auto --durations=0 test/${{ matrix.test }}
+        
 
-  test-ops:
-    name: Test Ops
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        model: ['CPU', 'LLVM', 'TORCH']
-    steps:
-    - uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-env
-    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/test_ops.py
-
+#  test-models:
+#    name: Test Models
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    strategy:
+#      matrix:
+#        model: ['CPU', 'LLVM', 'TORCH']
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#    - uses: actions/cache@v3
+#      id: model-cache
+#      with:
+#        path: |
+#          /home/runner/.cache/torch/
+#        key: models-${{ hashFiles('test/models/**.py') }}
+#    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/models
+#
+#  test-ops:
+#    name: Test Ops
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    strategy:
+#      matrix:
+#        model: ['CPU', 'LLVM', 'TORCH']
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/test_ops.py
+#
+#  test-tensors:
+#    name: Test Tensors
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    strategy:
+#      matrix:
+#        model: ['CPU', 'LLVM', 'TORCH']
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/test_tensors.py
+#
+#  test-speed-v-torch:
+#    name: Test Speed vs Torch
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 20
+#    strategy:
+#      matrix:
+#        model: ['CPU', 'LLVM'] # ?'TORCH'
+#    steps:
+#    - uses: actions/checkout@v3
+#    - uses: ./.github/actions/setup-env
+#    - run: source .venv/bin/activate && CI=1 ${{ matrix.model }}=1 python -m pytest -s -v -n=auto --durations=0 test/test_tensors.py
+#
+#
 #  cpu:
 #    name: Test CPU
 #    needs: lets-cache
