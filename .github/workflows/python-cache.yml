@@ -1,0 +1,61 @@
+# TODO: Change the way we cache dependencies from .venv to global cache
+#       so we don't have to activate the venv in every run step.
+name: Cache Python Dependencies
+on:
+  push:
+    paths:
+    - '**/setup.py'
+jobs:
+  cache-python-deps:
+    name: Cache Python Dependencies
+    strategy:
+      matrix:
+        # TODO: Just threw the kitchen sink in here for now. We can pare this down.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9, 3.10, 3.11]
+        depends: ['testing', 'testing,linting', 'testing,webgpu', 'llvm,testing', 'metal,testing', 'testing, cuda']
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/setup-python@v4
+      id: python
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/cache@v3
+      id: cache
+      with:
+        path: .venv
+        # Example cache key: ubuntu-latest.python-3.9.dependencies[testing,linting]-cb40e...
+        key: ${{ runner.os }}.python-${{ steps.python.outputs.python-version }}.dependencies[${{ matrix.depends }}]-${{ hashFiles('**/setup.py') }}
+    
+    # Metal dependencies are only cached on macOS
+    # Cuda dependencies are only cached on Windows/Linux
+    # TODO: ^ does pycuda have emulation on macOS? Will figure it out later this hits all the current use cases.
+    - if: |
+        steps.cache.outputs.cache-hit != 'true' &&
+        matrix.os == 'ubuntu-latest' &&
+        matrix.depends != 'metal,testing'
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -e '.[${{ matrix.depends }}]' --extra-index-url https://download.pytorch.org/whl/cpu
+      shell: bash
+    - if: |
+        steps.cache.outputs.cache-hit != 'true' && 
+        matrix.os == 'macos-latest' &&
+        matrix.depends != 'testing, cuda'
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -e '.[${{ matrix.depends }}]' --extra-index-url https://download.pytorch.org/whl/cpu
+      shell: bash
+    - if: |
+        steps.cache.outputs.cache-hit != 'true' && 
+        matrix.os == 'windows-latest' &&
+        matrix.depends != 'metal,testing'
+      run: |
+        python -m venv .venv
+        .venv\Scripts\activate
+        python -m pip install --upgrade pip
+        pip install -e '.[${{ matrix.depends }}]' --extra-index-url https://download.pytorch.org/whl/cpu
