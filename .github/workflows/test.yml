@@ -10,16 +10,14 @@ jobs:
     name: Linters
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
+    - name: Setup Python
+      uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-    - name: Install dependencies
-      run: pip install -e '.[linting,testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+        depends: 'testing,linting'
     - name: Repo line count
       run: python3 sz.py
     - name: Lint with pylint
@@ -39,16 +37,14 @@ jobs:
     name: CPU Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
+    - name: Setup Python
+      uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-    - name: Install Dependencies
-      run: pip install -e '.[testing]' --extra-index-url https://download.pytorch.org/whl/cpu
+        depends: 'testing'
     - name: Test Docs
       run: python docs/abstractions.py
     - name: Test Quickstart
@@ -59,16 +55,14 @@ jobs:
   testwebgpu:
     name: WebGPU Tests
     runs-on: macos-13
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
+    - name: Setup Python
+      uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-    - name: Install Dependencies
-      run: pip install -e '.[testing,webgpu]' --extra-index-url https://download.pytorch.org/whl/cpu
+        depends: 'testing,webgpu'
     # - name: Set Env
     #   run: printf "WEBGPU=1\nWGPU_BACKEND_TYPE=D3D12\n" >> $GITHUB_ENV
     - name: Run Pytest
@@ -79,11 +73,11 @@ jobs:
     #   run: npm install puppeteer
     # - name: Run Efficientnet
     #   run: node test/test_webgpu.js
+
   testimagenet:
     name: ImageNet to C Compile Test
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
