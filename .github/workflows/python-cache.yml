@@ -1,5 +1,7 @@
 # TODO: Change the way we cache dependencies from .venv to global cache
 #       so we don't have to activate the venv in every run step.
+# TODO: https://github.com/actions/runner/issues/662 - Exit success on cache hit
+#       so we can remove "steps.cache.outputs.cache-hit != 'true'" from every run step.
 name: Cache Python Dependencies
 on:
   push:
@@ -17,7 +19,7 @@ jobs:
         python-version: [3.6, 3.7, 3.8, 3.9, 3.10, 3.11]
         # TODO: Feel like you could pass these in individually and cache them individually
         #       without so much repetition in the run steps.
-        depends: ['testing', 'testing,linting', 'testing,webgpu', 'llvm,testing', 'metal,testing', 'testing, cuda']
+        depends: ['', 'testing', 'testing,linting', 'testing,webgpu', 'llvm,testing', 'metal,testing', 'testing, cuda']
     runs-on: ${{ matrix.os }}
     steps:
     # actions/setup-python uses toolbox cache by default
@@ -31,6 +33,28 @@ jobs:
         path: .venv
         # Example cache key: ubuntu-latest.python-3.9.dependencies[testing,linting]-cb40e...
         key: ${{ runner.os }}.python-${{ matrix.python-version }}.dependencies[${{ matrix.depends }}]-${{ hashFiles('**/setup.py') }}
+    - id: parse-depends-bash
+      if: |
+        steps.cache.outputs.cache-hit != 'true' &&
+        matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      run: |
+        if [[ -z "${{ matrix.depends }}" ]]; then 
+          echo "::set-output name=depends::."
+        else
+          echo "::set-output name=depends::.[${{ matrix.depends }}]"
+        fi
+      shell: bash
+    - id: parse-depends-pwsh
+      if: |
+        steps.cache.outputs.cache-hit != 'true' &&
+        matrix.os == 'windows-latest'
+      run: |
+        if ("${{ matrix.depends }}" -eq "") { echo "::set-output name=depends::." }
+        else { echo "::set-output name=depends::.[$(${{ matrix.depends }})]" }
+      shell: pwsh
+    - id: depends
+      run: |
+        echo "::set-output name=depends::${{ steps.parse-depends-bash.outputs.depends-unix || steps.parse-depends-pwsh.outputs.depends-windows }}"    
     # Metal dependencies are only cached on macOS
     # Cuda dependencies are only cached on Windows/Linux
     # TODO: ^ does pycuda have emulation on macOS? Will figure it out later this hits all the current use cases.
@@ -42,7 +66,7 @@ jobs:
         python -m venv .venv
         source .venv/bin/activate
         python -m pip install --upgrade pip
-        pip install -e '.[${{ matrix.depends }}]' --extra-index-url https://download.pytorch.org/whl/cpu
+        pip install -e '${{ steps.depends.outputs.depends }}' --extra-index-url https://download.pytorch.org/whl/cpu
       shell: bash
     - if: |
         steps.cache.outputs.cache-hit != 'true' && 
@@ -52,7 +76,7 @@ jobs:
         python -m venv .venv
         source .venv/bin/activate
         python -m pip install --upgrade pip
-        pip install -e '.[${{ matrix.depends }}]' --extra-index-url https://download.pytorch.org/whl/cpu
+        pip install -e '${{ steps.depends.outputs.depends }}' --extra-index-url https://download.pytorch.org/whl/cpu
       shell: bash
     - if: |
         steps.cache.outputs.cache-hit != 'true' && 
@@ -62,4 +86,5 @@ jobs:
         python -m venv .venv
         .venv\Scripts\activate
         python -m pip install --upgrade pip
-        pip install -e '.[${{ matrix.depends }}]' --extra-index-url https://download.pytorch.org/whl/cpu
+        pip install -e '${{ steps.depends.outputs.depends }}' --extra-index-url https://download.pytorch.org/whl/cpu
+      shell: pwsh
