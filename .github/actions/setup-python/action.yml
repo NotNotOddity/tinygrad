@@ -19,9 +19,8 @@ runs:
       id: dependency-cache
       with:
         path: ${{ steps.setup-python.outputs.python-path }}
-        key: ${{ runner.os }}-python${{ inputs.python-version }}-${{ hashFiles(format('{0}{1}', hashFiles(inputs.pip-install), hashFiles('**/setup.py'))) }}
-        restore-keys: |
-          ${{ runner.os }}-python${{ inputs.python-version }}-pip${{ inputs.pip-install }}-
+        key: ${{ runner.os }}-python${{ inputs.python-version }}-${{ hashFiles(inputs.pip-install) }}-${{ hashFiles('**/setup.py') }}
+        ${{ runner.os }}-python${{ inputs.python-version }}-${{ hashFiles('.') }}-
     - if: |
         steps.dependency-cache.outputs.cache-hit != 'true' && 
         (runner.os == 'Linux' || runner.os == 'macOS')
