@@ -19,7 +19,7 @@ runs:
       id: dependency-cache
       with:
         path: ${{ steps.setup-python.outputs.python-path }}
-        key: ${{ runner.os }}-python${{ inputs.python-version }}-${{ hashFiles(inputs.pip-install) }}-${{ hashFiles('**/setup.py') }}
+        key: ${{ runner.os }}-python${{ inputs.python-version }}-${{ hashFiles(format('{0}',inputs.pip-install)) }}-${{ hashFiles('**/setup.py') }}
         restore-keys: |
           ${{ runner.os }}-python${{ inputs.python-version }}-${{ hashFiles('.') }}-
     - if: |
